@@ -53,8 +53,15 @@ public final class Transformers {
      * @param <O> output elements type
      * @return A transformed list where each input element is replaced with the produced elements
      */
-    public static <I, O> List<O> transform(final Iterable<I> base, final Function<I, O> transformer) {
-        return null;
+    public static <I, O> List<O> transform(
+        final Iterable<I> base
+        , final Function<I,O> transformer) {
+
+        final var result = new ArrayList<O>();
+        for(I input : Objects.requireNonNull(base)){
+            result.add(transformer.call(input));
+        }
+        return result;
     }
 
     /**
@@ -70,7 +77,9 @@ public final class Transformers {
      * @return A flattened list with the elements of each collection in the input
      */
     public static <I> List<? extends I> flatten(final Iterable<? extends Collection<? extends I>> base) {
-        return null;
+        Objects.requireNonNull(base);
+
+        return flattenTransform(base, Function.identity());
     }
 
     /**
@@ -87,7 +96,14 @@ public final class Transformers {
      * @return A list containing only the elements that passed the test
      */
     public static <I> List<I> select(final Iterable<I> base, final Function<I, Boolean> test) {
-        return null;
+        final var result = new ArrayList<I>();
+
+        for(I input : Objects.requireNonNull(base)){
+            if(test.call(input)){
+                result.add(input);
+            }
+        }
+        return result;
     }
 
     /**
@@ -103,6 +119,13 @@ public final class Transformers {
      * @return A list containing only the elements that passed the test
      */
     public static <I> List<I> reject(final Iterable<I> base, final Function<I, Boolean> test) {
-        return null;
+        final var result = new ArrayList<I>();
+
+        for(I input : Objects.requireNonNull(base)){
+            if(!test.call(input)){
+                result.add(input);
+            }
+        }
+        return result;
     }
 }

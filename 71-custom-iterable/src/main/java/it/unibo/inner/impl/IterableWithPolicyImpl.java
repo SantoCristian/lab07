@@ -1,29 +1,40 @@
 package it.unibo.inner.impl;
 
-import java.util.Arrays;
+
 import java.util.Iterator;
 import it.unibo.inner.api.Predicate;
 import it.unibo.inner.api.IterableWithPolicy;
+import java.util.List;
+import java.util.NoSuchElementException;
 public class IterableWithPolicyImpl<T> implements IterableWithPolicy<T>{
 
-    private final T[] array;
-    private final Predicate<T> predicate;
+    private final List<T> array;
+    private Predicate<T> predicate;
 
-    public IterableWithPolicyImpl(final T[] array){
-        IterableWithPolicyImpl(array, true);
-    }
+    
 
     public IterableWithPolicyImpl(final T[] array, final Predicate<T> filter){
 
-         this.array = Arrays.copyOf(array, array.length);
+         this.array = List.of(array);
          this.predicate = filter;
     }
+
+    public IterableWithPolicyImpl(final T[] array){
+        this(array, new Predicate<T>(){//creo classe anonima
+            @Override 
+            public boolean test(T elem){
+                return true;
+            }
+        });
+    }
+
     /**
      * {@inheritDoc}
      */
     
     @Override
     public void setIterationPolicy(final Predicate<T> filter){
+        this.predicate = filter;
     }
 
     public inner iterator(){
@@ -35,12 +46,21 @@ public class IterableWithPolicyImpl<T> implements IterableWithPolicy<T>{
 
         @Override 
         public boolean hasNext(){
-            return currentIndex < array.length; // Array.getLength(IterableWithPolicyImpl.this.array);
+            while(currentIndex < IterableWithPolicyImpl.this.array.size()){
+                if(IterableWithPolicyImpl.this.predicate.test(IterableWithPolicyImpl.this.array.get(currentIndex))){
+                    return true;
+                }
+                currentIndex++;
+            }
+            return false;
         }
 
         @Override
         public T next(){
-            return IterableWithPolicyImpl.this.array[currentIndex++];
+            if(hasNext()){
+                return IterableWithPolicyImpl.this.array.get(currentIndex++);
+            }
+            throw new NoSuchElementException();
         }
 
         @Override 
